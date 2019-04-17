@@ -148,9 +148,7 @@ void suggest(struct Hash hash, char str[30]){
 		}
 		i++;	
 	}
-	
 	if(flag == 0){
-		printf("Count:%d\n",count);
 		printf("Suggestion: %s\n",str);
 		return;
 	}	
@@ -250,7 +248,6 @@ int main(){
 	printf("Enter search word:");
 	scanf("%s",word);
 	suggest(table,word);
-	
 	
 	free(table.node);
 }
