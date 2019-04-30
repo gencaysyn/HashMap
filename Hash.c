@@ -1,14 +1,15 @@
+#define DEBUG
+
 #include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
 
 int m = 487;
 int R = 479;
+
 char file_name[] = "smallDictionary.txt";
 char table_name[] = "table.txt";
-char mod[] = "";
-char normal[] = "NORMAL";
-char debug[] = "DEBUG"; 
+
 
 struct Node{
 	int key;
@@ -52,24 +53,24 @@ void insertElement(struct Hash *hash, char str[30]){
 	
 	node.key = generator(str);
 	i = -1;
-	if(strcmp(mod,debug) == 0){
+	#ifdef DEBUG
 		printf("\nh1: %d Offset:%d\n",node.key%m,R-(node.key%R));
-	}
+	#endif
 	
 	do{
 		index = h(node.key,++i);
-		if(strcmp(mod,debug) == 0){
+		#ifdef DEBUG
 			printf("i:%d---%d\n",i,index);	
-		}
+		#endif
 	}while((hash->node[index].key != -1) && (i < m));
 
 	if(i != m){
 		hash->node[index].key = node.key;
 		strcpy(hash->node[index].val,str); 
 		hash->count++;
-		if(strcmp(mod,debug) == 0){
+		#ifdef DEBUG
 			printf("'%s' inserted to %d. line key:%d \n",node.val,index, node.key);	
-		}
+		#endif
 		return;
 	}
 	printf("Failed to add element!\n");
@@ -83,21 +84,20 @@ int search(struct Hash hash, char str[30]){
 	node.key = generator(str);
 	
 	i = -1;
-	if(strcmp(mod,debug) == 0){
+	#ifdef DEBUG
 		printf("\nh1: %d Offset:%d\n",node.key%m,R-(node.key%R));
-	}
+	#endif
 	do{
 		index = h(node.key,++i);
-		if(strcmp(mod,debug) == 0){
+		#ifdef DEBUG
 			printf("i:%d---index:%d\n",i,index);	
-		}
+		#endif
 	}while((hash.node[index].key != -1) && strcmp(hash.node[index].val, str) != 0);
 
-	
 	if(strcmp(hash.node[index].val, str) == 0){
-		if(strcmp(mod,debug) == 0){
+		#ifdef DEBUG
 			printf("'%s' found in %d. line, key:%d \n",node.val,index, node.key);	
-		}
+		#endif
 		return i+1;
 	}
 	return -1;
@@ -121,21 +121,26 @@ void saveTable(struct Hash table){
 }
 	
 void suggest(struct Hash hash, char str[30]){
-	if(search(hash,str) != -1){
-		if(strcmp(mod,debug) == 0){
-			printf("word found in %d step(s).\n",search(hash,str));	
-		}
-		printf("Contains the word!");
-		return;
-	}
 	char buffer[30];
 	int max = strlen(str);
 	int letter;
 	int i = 0;
 	int flag = -1;
 	int result;
-	strcpy(buffer,str);
 	
+	result = search(hash,str);
+	if(result != -1){
+		#ifdef DEBUG
+			printf("Word found in %d step(s).\n",result);	
+		#endif
+		printf("Contains the word!");
+		return;
+	}else{
+		printf("The word does not contain.\n");
+	}
+	
+	strcpy(buffer,str);
+
 	while(flag == -1 && i < max){
 		letter = 97;
 		strcpy(str,buffer);
@@ -148,6 +153,7 @@ void suggest(struct Hash hash, char str[30]){
 		}
 		i++;	
 	}
+	
 	if(flag == 0){
 		printf("Suggestion: %s\n",str);
 		return;
@@ -208,24 +214,13 @@ void printTable(struct Hash table){
 }
 
 int main(){
-	struct Hash table = createHash();
-	
-	while(strcmp(mod,normal)!=0 && strcmp(mod,debug)!=0){
-		printf("Select mode(NORMAL/DEBUG):");
-		scanf("%s",mod);
-	}
-	
-	if(strcmp(mod,normal) == 0)
-		strcpy(mod,normal);
-	else{
-		strcpy(mod,debug);
-	}
-	
 	int selector;
 	printf("Do you want to create hash table?(1/0)");
 	do{
 		scanf("%d",&selector);
 	}while(selector != 0 && selector != 1);
+	
+	struct Hash table = createHash();
 	
 	if(selector == 1){
 		printf("\nDictionary file name:");
@@ -240,14 +235,14 @@ int main(){
 			return 0;
 	}
 	
-	if(strcmp(mod,debug) == 0){
+	#ifdef DEBUG
 		printTable(table);	
-	}
-	
+	#endif
 	char word[30];
 	printf("Enter search word:");
 	scanf("%s",word);
 	suggest(table,word);
 	
+
 	free(table.node);
 }
